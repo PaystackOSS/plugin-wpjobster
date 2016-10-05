@@ -276,6 +276,7 @@ class WPJobster_Paystack_Loader {
 	 * @since 1.0.0
 	 */
 	public function taketogateway_function() {
+		  
 		$credentials = $this->get_gateway_credentials();
 
 		$all_data  = array();
@@ -283,6 +284,10 @@ class WPJobster_Paystack_Loader {
 		// $all_data['secretkey'] = $credentials['secretkey'];
 		
 		$currency = wpjobster_get_currency();
+		if ($currency != 'NGN') {
+		   _e('You can only pay in Naira with Paystack, go back and select Naira','wpjobster');
+			exit;
+		}
 
 		$common_details = get_common_details( $this->unique_slug, 0, $currency );
 
