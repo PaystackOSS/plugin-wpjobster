@@ -178,16 +178,6 @@ class WPJobster_Paystack_Loader
       <form method="post" action="<?php bloginfo('siteurl'); ?>/wp-admin/admin.php?page=payment-methods&active_tab=tabs<?php echo $tab_id; ?>">
       <table width="100%" class="sitemile-table">
                 <tr>
-                    <td valign=top width="22"><?php wpjobster_theme_bullet(); ?></td>
-                    <td valign="top"><?php _e('Paystack Gateway Note:', 'wpjobster-paystack'); ?></td>
-                    <td>
-                    <p><?php _e('Do you have any special instructions for your gateway?', 'wpjobster-paystack'); ?></p>
-                    <p><?php _e('You can put them here.', 'wpjobster-paystack'); ?></p>
-                    <p>Set this as your callback URL on your Paystack Dashboard<code><?php echo get_bloginfo('siteurl') . '/?payment_response=paystack_response';?></code></p>
-                    </td>
-                </tr>
-
-                <tr>
         <?php // _enable and _button_caption are mandatory ?>
                     <td valign=top width="22"><?php wpjobster_theme_bullet(__('Enable/Disable Paystack payment gateway', 'wpjobster-paystack')); ?></td>
                     <td width="200"><?php _e('Enable:', 'wpjobster-paystack'); ?></td>
@@ -359,8 +349,8 @@ class WPJobster_Paystack_Loader
         
         $paystack_url = 'https://api.paystack.co/transaction/initialize';
         $headers = array(
-        'Content-Type'    => 'application/json',
-        'Authorization'   => 'Bearer ' . $credentials['secretkey']
+            'Content-Type'    => 'application/json',
+            'Authorization'   => 'Bearer ' . $credentials['secretkey']
         );
         //Create Plan
         $body = array(
@@ -368,6 +358,7 @@ class WPJobster_Paystack_Loader
         'amount'     => $koboamount,
         'reference'  => $txn_code,
         'metadata'   => json_encode(array('custom_fields' => $meta )),
+        'callback_url'=> get_bloginfo('url') . '?payment_response=paystack_response',
 
         );
         $args = array(
@@ -383,7 +374,6 @@ class WPJobster_Paystack_Loader
             $url    = $paystack_response->data->authorization_url;
             wp_redirect($url);
             exit;
-            
         }
         exit;
     }
