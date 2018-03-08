@@ -65,12 +65,21 @@ class WPJobster_Paystack_Loader {
 		add_action( 'plugins_loaded', array( $this, 'init_gateways' ), 0 );
 		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
 
-		add_action( 'wpjobster_taketo_paystack_gateway', array( $this, 'taketogateway_function' ), 10 );
-		add_action( 'wpjobster_processafter_paystack_gateway', array( $this, 'processgateway_function' ), 10 );
+		add_filter( 'wpjobster_take_allowed_currency_paystack_gateway', array( $this,'get_gateway_currency' ) );
+
+		add_action( 'wpjobster_taketo_paystack_gateway', array( $this, 'taketogateway_function' ), 10, 2 );
+		add_action( 'wpjobster_processafter_paystack_gateway', array( $this, 'processgateway_function' ), 10, 2 );
 
 		if ( isset( $_POST[ 'wpjobster_save_' . $this->unique_slug ] ) ) {
 			add_action( 'wpjobster_payment_methods_action', array( $this, 'save_gateway' ), 11 );
 		}
+	}
+
+	function get_gateway_currency( $currency ) {
+		// if the gateway requires a specific currency you can declare it there
+		// currency conversions are done automatically
+		$currency = 'NGN'; // delete this line if the gateway works with any currency
+		return $currency;
 	}
 
 
@@ -275,7 +284,7 @@ class WPJobster_Paystack_Loader {
 	 *
 	 * @since 1.0.0
 	 */
-	public function taketogateway_function() {
+	public function taketogateway_function($payment_type, $common_details) {
 		  
 		$credentials = $this->get_gateway_credentials();
 
@@ -289,8 +298,6 @@ class WPJobster_Paystack_Loader {
 			exit;
 		}
 
-		$common_details = get_common_details( $this->unique_slug, 0, $currency );
-
 		$uid                            = $common_details['uid'];
 		$order_id                            = $common_details['order_id'];
 		$wpjobster_final_payable_amount = $common_details['wpjobster_final_payable_amount'];
@@ -299,6 +306,7 @@ class WPJobster_Paystack_Loader {
 		////
 		$all_data['amount']       = $wpjobster_final_payable_amount;
 		$all_data['currency']     = $currency;
+		
 		// any other info that the gateway needs
 		$all_data['firstname']    = user( $uid, 'first_name' );
 		$all_data['email']        = user( $uid, 'user_email' );
@@ -311,7 +319,10 @@ class WPJobster_Paystack_Loader {
 		$all_data['job_id']      = $common_details['pid'];
 		$all_data['user_id']      = $common_details['uid'];
 		$all_data['order_id']      = $order_id;
-		////
+
+		$all_data['success_url']  = get_bloginfo( 'url' ) . '/?payment_response=sample&payment_type=' . $payment_type;
+		$all_data['fail_url']     = get_bloginfo( 'url' ) . '/?payment_response=sample&action=fail&payment_type=' . $payment_type;
+
 		$txn = $this->paystack_generate_new_code();
 		$meta = $this->paystack_meta_as_custom_fields($all_data);
 		// echo '<pre>';
@@ -355,7 +366,7 @@ class WPJobster_Paystack_Loader {
 	 *
 	 * @since 1.0.0
 	 */
-	function processgateway_function() {
+	function processgateway_function( $payment_type, $details ) {
 
 		$credentials        = $this->get_gateway_credentials();
 		$key                = $credentials['secretkey'];
@@ -392,50 +403,72 @@ class WPJobster_Paystack_Loader {
 
 		}
 
+		// if ( $status == 'success' ) {
+
+		// 	if ( $amount == $order_amount) {
+		// 		$payment_status = 'completed';
+		// 		$payment_response = maybe_serialize( $_POST ); // maybe we want to debug later
+		// 		$payment_details = '';
+
+		// 		wpjobster_mark_job_prchase_completed( $order_id, $payment_status, $payment_response, $payment_details );
+
+		// 		if ( get_option( 'wpjobster_paystack_success_page' ) != '' ) {
+		// 			wp_redirect( get_permalink( get_option( 'wpjobster_paystack_success_page' ) ) );
+		// 		} else {
+		// 			wp_redirect( get_bloginfo( 'siteurl' ) . '/?jb_action=chat_box&oid=' . $order_id );
+		// 		}
+
+		// 		exit;
+
+		// 	} else {
+
+		// 		$payment_status  = 'failed';
+		// 		$payment_response = maybe_serialize( $_POST ); // maybe we want to debug later
+		// 		$payment_details = 'Final amount is different! ' . $common_details['wpjobster_final_payable_amount'] . ' expected, ' . $amount . ' paid.';
+
+		// 		wpjobster_mark_job_prchase_completed( $order_id, $payment_status, $payment_response, $payment_details );
+
+		// 		if ( get_option( 'wpjobster_paystack_failure_page' ) != '' ) {
+		// 			wp_redirect( get_permalink( get_option( 'wpjobster_paystack_failure_page' ) ) );
+		// 		} else {
+		// 			wp_redirect( get_bloginfo( 'siteurl' ) . '/?jb_action=chat_box&oid=' . $order_id );
+		// 		}
+		// 	}
+		// } else {
+
+		// 	$payment_status = 'failed';
+		// 	$payment_response = maybe_serialize( $_POST );
+		// 	$payment_details = 'Paystack gateway declined the transaction';
+
+		// 	wpjobster_mark_job_prchase_completed( $order_id, $payment_status, $payment_response, $payment_details );
+
+		// 	if ( get_option( 'wpjobster_paystack_failure_page' ) != '' ) {
+		// 		wp_redirect( get_permalink( get_option( 'wpjobster_paystack_failure_page' ) ) );
+		// 	} else {
+		// 		wp_redirect( get_bloginfo( 'siteurl' ) . '/?jb_action=chat_box&oid=' . $order_id );
+		// 	}
+		// }
+
+		$payment_response = $serialise = maybe_serialize( $_REQUEST );
+ 
 		if ( $status == 'success' ) {
-
-			if ( $amount == $order_amount) {
-				$payment_status = 'completed';
-				$payment_response = maybe_serialize( $_POST ); // maybe we want to debug later
-				$payment_details = '';
-
-				wpjobster_mark_job_prchase_completed( $order_id, $payment_status, $payment_response, $payment_details );
-
-				if ( get_option( 'wpjobster_paystack_success_page' ) != '' ) {
-					wp_redirect( get_permalink( get_option( 'wpjobster_paystack_success_page' ) ) );
-				} else {
-					wp_redirect( get_bloginfo( 'siteurl' ) . '/?jb_action=chat_box&oid=' . $order_id );
-				}
-
-				exit;
-
-			} else {
-
-				$payment_status  = 'failed';
-				$payment_response = maybe_serialize( $_POST ); // maybe we want to debug later
-				$payment_details = 'Final amount is different! ' . $common_details['wpjobster_final_payable_amount'] . ' expected, ' . $amount . ' paid.';
-
-				wpjobster_mark_job_prchase_completed( $order_id, $payment_status, $payment_response, $payment_details );
-
-				if ( get_option( 'wpjobster_paystack_failure_page' ) != '' ) {
-					wp_redirect( get_permalink( get_option( 'wpjobster_paystack_failure_page' ) ) );
-				} else {
-					wp_redirect( get_bloginfo( 'siteurl' ) . '/?jb_action=chat_box&oid=' . $order_id );
-				}
-			}
+			$payment_details = "success action returned"; // any info you may find useful for debug
+			do_action( "wpjobster_" . $payment_type . "_payment_success",
+				$order_id,
+				$this->unique_slug,
+				$payment_details,
+				$payment_response
+			);
+			die();
 		} else {
-
-			$payment_status = 'failed';
-			$payment_response = maybe_serialize( $_POST );
-			$payment_details = 'Paystack gateway declined the transaction';
-
-			wpjobster_mark_job_prchase_completed( $order_id, $payment_status, $payment_response, $payment_details );
-
-			if ( get_option( 'wpjobster_paystack_failure_page' ) != '' ) {
-				wp_redirect( get_permalink( get_option( 'wpjobster_paystack_failure_page' ) ) );
-			} else {
-				wp_redirect( get_bloginfo( 'siteurl' ) . '/?jb_action=chat_box&oid=' . $order_id );
-			}
+			$payment_details = "Failed action returned"; // any info you may find useful for debug
+			do_action( "wpjobster_" . $payment_type . "_payment_failed",
+				$order_id,
+				$this->unique_slug,
+				$payment_details,
+				$payment_response
+			);
+			die();
 		}
 	}
 
