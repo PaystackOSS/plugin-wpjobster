@@ -8,10 +8,10 @@
  * or Fiverr by setting an hourly rate or fixed price.
  * 
  * Plugin Name: WPJobster Paystack Gateway
- * Plugin URI: http://wpjobster.com/
+ * Plugin URI: https://developers.paystack.co/v1.0/docs/plugins
  * Description: This plugin extends WPJobster Theme to accept payments with Paystack.
  * Author: Paystack
- * Author URI: http://paystack.com/
+ * Author URI: https://paystack.com/
  * Version: 2.0
  * 
  * @category   CategoryName
