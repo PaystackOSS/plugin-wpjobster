@@ -12,9 +12,7 @@
  * Description: This plugin extends WPJobster Theme to accept payments with Paystack.
  * Author: Paystack
  * Author URI: http://paystack.com/
- * Version: 1.0
- *
- * Copyright (c) 2016 WPJobster
+ * Version: 2.0
  * 
  * @category   CategoryName
  * @package    PackageName
@@ -38,7 +36,7 @@ if (! defined('ABSPATH') ) {
 /**
  * Required minimums
  */
-define('WPJOBSTER_SAMPLE_MIN_PHP_VER', '5.4.0');
+define('WPJOBSTER_PAYSTACK_MIN_PHP_VER', '5.4.0');
 
 
 class WPJobster_Paystack_Loader
@@ -128,7 +126,7 @@ class WPJobster_Paystack_Loader
         $methods[$this->priority] =
         array(
         'label'           => __('Paystack', 'wpjobster-paystack'),
-        'action'          => '',
+        'action'          => 'wpjobster_taketo_paystack_gateway',
         'unique_id'       => $this->unique_slug,
         'process_action'  => 'wpjobster_taketo_paystack_gateway',
         'response_action' => 'wpjobster_processafter_paystack_gateway',
@@ -284,8 +282,6 @@ class WPJobster_Paystack_Loader
         return $credentials;
     }
 
-
-
     function paystack_generate_new_code($length = 10)
     {
         $characters = '06EFGHI9KL'.time().'MNOPJRSUVW01YZ923234'.time().'ABCD5678QXT';
@@ -315,8 +311,7 @@ class WPJobster_Paystack_Loader
      * @since 1.0.0
      */
     public function taketogateway_function($payment_type, $common_details) 
-    {
-          
+    {  
         $credentials = $this->get_gateway_credentials();
 
         $all_data  = array();
@@ -329,30 +324,30 @@ class WPJobster_Paystack_Loader
             exit;
         }
 
-        $uid                            = $common_details['uid'];
+        $uid                                 = $common_details['uid'];
         $order_id                            = $common_details['order_id'];
-        $wpjobster_final_payable_amount = $common_details['wpjobster_final_payable_amount'];
-        $currency                       = $common_details['currency'];
+        $wpjobster_final_payable_amount      = $common_details['wpjobster_final_payable_amount'];
+        $currency                            = $common_details['currency'];
 
         ////
-        $all_data['amount']       = $wpjobster_final_payable_amount;
-        $all_data['currency']     = $currency;
+        $all_data['amount']                  = $wpjobster_final_payable_amount;
+        $all_data['currency']                = $currency;
         
         // any other info that the gateway needs
-        $all_data['firstname']    = user($uid, 'first_name');
-        $all_data['email']        = user($uid, 'user_email');
-        $all_data['phone']        = user($uid, 'cell_number');
-        $all_data['lastname']     = user($uid, 'last_name');
-        $all_data['address']      = user($uid, 'address');
-        $all_data['city']         = user($uid, 'city');
-        $all_data['country']      = user($uid, 'country_name');
-        $all_data['job_title']      = $common_details['job_title'];
-        $all_data['job_id']      = $common_details['pid'];
-        $all_data['user_id']      = $common_details['uid'];
-        $all_data['order_id']      = $order_id;
+        $all_data['firstname']               = user($uid, 'first_name');
+        $all_data['email']                   = user($uid, 'user_email');
+        $all_data['phone']                   = user($uid, 'cell_number');
+        $all_data['lastname']                = user($uid, 'last_name');
+        $all_data['address']                 = user($uid, 'address');
+        $all_data['city']                    = user($uid, 'city');
+        $all_data['country']                 = user($uid, 'country_name');
+        $all_data['job_title']               = $common_details['job_title'];
+        $all_data['job_id']                  = $common_details['pid'];
+        $all_data['user_id']                 = $common_details['uid'];
+        $all_data['order_id']                = $order_id;
 
-        $all_data['success_url']  = get_bloginfo('url') . '/?payment_response=paystack&payment_type=' . $payment_type;
-        $all_data['fail_url']     = get_bloginfo('url') . '/?payment_response=paystack&action=fail&payment_type=' . $payment_type;
+        $all_data['success_url']             = get_bloginfo('url') . '/?payment_response=paystack&payment_type=' . $payment_type;
+        $all_data['fail_url']                = get_bloginfo('url') . '/?payment_response=paystack&action=fail&payment_type=' . $payment_type;
 
         $txn = $this->paystack_generate_new_code();
         $meta = $this->paystack_meta_as_custom_fields($all_data);
@@ -365,18 +360,18 @@ class WPJobster_Paystack_Loader
         $paystack_url = 'https://api.paystack.co/transaction/initialize';
         $headers = array(
         'Content-Type'    => 'application/json',
-        'Authorization' => 'Bearer ' . $credentials['secretkey']
+        'Authorization'   => 'Bearer ' . $credentials['secretkey']
         );
         //Create Plan
         $body = array(
-        'email'    => user($uid, 'user_email'),
-        'amount' => $koboamount,
-        'reference' => $txn_code,
-        'metadata' => json_encode(array('custom_fields' => $meta )),
+        'email'      => user($uid, 'user_email'),
+        'amount'     => $koboamount,
+        'reference'  => $txn_code,
+        'metadata'   => json_encode(array('custom_fields' => $meta )),
 
         );
         $args = array(
-        'body'        => json_encode($body),
+        'body'       => json_encode($body),
         'headers'    => $headers,
         'timeout'    => 60
         );
@@ -406,7 +401,7 @@ class WPJobster_Paystack_Loader
         $code      = $_GET['trxref'];
         $paystack_url = 'https://api.paystack.co/transaction/verify/' . $code;
         $headers = array(
-        'Authorization' => 'Bearer ' . $key
+            'Authorization' => 'Bearer ' . $key
         );
         $args = array(
         'headers'    => $headers,
@@ -558,13 +553,13 @@ class WPJobster_Paystack_Loader
      */
     static function get_environment_warning( $during_activation = false ) 
     {
-        if (version_compare(phpversion(), WPJOBSTER_SAMPLE_MIN_PHP_VER, '<') ) {
+        if (version_compare(phpversion(), WPJOBSTER_PAYSTACK_MIN_PHP_VER, '<') ) {
             if ($during_activation ) {
                 $message = __('The plugin could not be activated. The minimum PHP version required for this plugin is %1$s. You are running %2$s.', 'wpjobster-paystack');
             } else {
                 $message = __('The Paystack Powered by wpjobster plugin has been deactivated. The minimum PHP version required for this plugin is %1$s. You are running %2$s.', 'wpjobster-paystack');
             }
-            return sprintf($message, WPJOBSTER_SAMPLE_MIN_PHP_VER, phpversion());
+            return sprintf($message, WPJOBSTER_PAYSTACK_MIN_PHP_VER, phpversion());
         }
         return false;
     }
