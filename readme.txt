@@ -17,6 +17,8 @@ WP Jobster is the most advanced and feature rich WordPress Service Marketplace T
 
 The **Paystack Payment Option for WPJobster** allows site owners from Nigeria and Ghana to accept payments from their customers, anywhere.
 
+To be able to use the WPJobster Paystack Gateway, you must [have an account on Paystack](https://dashboard.paystack.com) from which you will get Test and Live API keys to connect the plugin to your Paystack business.
+
 = Intuitive Dashboard =
 Use the Paystack dashboard to manage your customers, payments, and track your growth.
 
