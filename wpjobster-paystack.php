@@ -145,20 +145,18 @@ class WPJobster_Paystack_Loader
     public function save_gateway() 
     {
         if (isset($_POST['wpjobster_save_' . $this->unique_slug]) ) {
-
             // _enable and _button_caption are mandatory
-            update_option('wpjobster_' . $this->unique_slug . '_enable',         trim($_POST['wpjobster_' . $this->unique_slug . '_enable']));
-            update_option('wpjobster_' . $this->unique_slug . '_button_caption', trim($_POST['wpjobster_' . $this->unique_slug . '_button_caption']));
+            update_option('wpjobster_' . $this->unique_slug . '_enable',         sanitize_text_field($_POST['wpjobster_' . $this->unique_slug . '_enable']));
+            update_option('wpjobster_' . $this->unique_slug . '_button_caption', sanitize_text_field($_POST['wpjobster_' . $this->unique_slug . '_button_caption']));
 
             // you can add here any other information that you need from the user
-            update_option('wpjobster_paystack_enablesandbox',                      trim($_POST['wpjobster_paystack_enablesandbox']));
-            update_option('wpjobster_paystack_tsk',                                 trim($_POST['wpjobster_paystack_tsk']));
-            update_option('wpjobster_paystack_tpk',                                trim($_POST['wpjobster_paystack_tpk']));
-            update_option('wpjobster_paystack_lsk',                                 trim($_POST['wpjobster_paystack_lsk']));
-            update_option('wpjobster_paystack_lpk',                                trim($_POST['wpjobster_paystack_lpk']));
-            // wpjobster_paystack_tsk
-            update_option('wpjobster_paystack_success_page',                       trim($_POST['wpjobster_paystack_success_page']));
-            update_option('wpjobster_paystack_failure_page',                       trim($_POST['wpjobster_paystack_failure_page']));
+            update_option('wpjobster_paystack_enablesandbox',                    sanitize_text_field($_POST['wpjobster_paystack_enablesandbox']));
+            update_option('wpjobster_paystack_tsk',                              sanitize_text_field($_POST['wpjobster_paystack_tsk']));
+            update_option('wpjobster_paystack_tpk',                              sanitize_text_field($_POST['wpjobster_paystack_tpk']));
+            update_option('wpjobster_paystack_lsk',                              sanitize_text_field($_POST['wpjobster_paystack_lsk']));
+            update_option('wpjobster_paystack_lpk',                              sanitize_text_field($_POST['wpjobster_paystack_lpk']));
+            update_option('wpjobster_paystack_success_page',                     sanitize_text_field($_POST['wpjobster_paystack_success_page']));
+            update_option('wpjobster_paystack_failure_page',                     sanitize_text_field($_POST['wpjobster_paystack_failure_page']));
 
             echo '<div class="updated fade"><p>' . __('Settings saved!', 'wpjobster-paystack') . '</p></div>';
         }
@@ -174,8 +172,8 @@ class WPJobster_Paystack_Loader
     {
         $tab_id = get_tab_id($wpjobster_payment_gateways);
         ?>
-     <div id="tabs<?php echo $tab_id?>">
-      <form method="post" action="<?php bloginfo('siteurl'); ?>/wp-admin/admin.php?page=payment-methods&active_tab=tabs<?php echo $tab_id; ?>">
+     <div id="tabs<?php echo esc_attr($tab_id)?>">
+      <form method="post" action="<?php bloginfo('siteurl'); ?>/wp-admin/admin.php?page=payment-methods&active_tab=tabs<?php echo esc_attr($tab_id); ?>">
       <table width="100%" class="sitemile-table">
                 <tr>
         <?php // _enable and _button_caption are mandatory ?>
@@ -192,7 +190,7 @@ class WPJobster_Paystack_Loader
         <?php // _enable and _button_caption are mandatory ?>
                     <td valign=top width="22"><?php wpjobster_theme_bullet(__('Put the Paystack button caption you want user to see on purchase page', 'wpjobster-paystack')); ?></td>
                     <td><?php _e('Paystack Button Caption:', 'wpjobster-paystack'); ?></td>
-                    <td><input type="text" size="85" name="wpjobster_<?php echo $this->unique_slug; ?>_button_caption" value="<?php echo get_option('wpjobster_' . $this->unique_slug . '_button_caption'); ?>" /></td>
+                    <td><input type="text" size="85" name="wpjobster_<?php echo esc_attr($this->unique_slug); ?>_button_caption" value="<?php echo get_option('wpjobster_' . $this->unique_slug . '_button_caption'); ?>" /></td>
                 </tr>
                 <tr>
                     <td valign=top width="22"><?php wpjobster_theme_bullet(__('Your Paystack Test Secret Key', 'wpjobster-paystack')); ?></td>
@@ -354,17 +352,17 @@ class WPJobster_Paystack_Loader
         );
         //Create Plan
         $body = array(
-        'email'      => user($uid, 'user_email'),
-        'amount'     => $koboamount,
-        'reference'  => $txn_code,
-        'metadata'   => json_encode(array('custom_fields' => $meta )),
-        'callback_url'=> get_bloginfo('url') . '?payment_response=paystack_response',
+        'email'        => user($uid, 'user_email'),
+        'amount'       => $koboamount,
+        'reference'    => $txn_code,
+        'metadata'     => json_encode(array('custom_fields' => $meta )),
+        'callback_url' => get_bloginfo('url') . '?payment_response=paystack_response',
 
         );
         $args = array(
-        'body'       => json_encode($body),
-        'headers'    => $headers,
-        'timeout'    => 60
+        'body'         => json_encode($body),
+        'headers'      => $headers,
+        'timeout'      => 60
         );
 
         $request = wp_remote_post($paystack_url, $args);
@@ -388,34 +386,34 @@ class WPJobster_Paystack_Loader
         $credentials        = $this->get_gateway_credentials();
         $key                = $credentials['secretkey'];
 
-        $code      = $_GET['trxref'];
-        $paystack_url = 'https://api.paystack.co/transaction/verify/' . $code;
-        $headers = array(
+        $code               = $_GET['trxref'];
+        $paystack_url       = 'https://api.paystack.co/transaction/verify/' . $code;
+        $headers            = array(
             'Authorization' => 'Bearer ' . $key
         );
-        $args = array(
-        'headers'    => $headers,
-        'timeout'    => 60
+        $args               = array(
+            'headers'    => $headers,
+            'timeout'    => 60
         );
         $request = wp_remote_get($paystack_url, $args);
         if (! is_wp_error($request) && 200 == wp_remote_retrieve_response_code($request) ) {
             $paystack_response = json_decode(wp_remote_retrieve_body($request));
 
             if ('success' == $paystack_response->data->status ) {
-                $status = $paystack_response->data->status;
-                $amount    = $paystack_response->data->amount / 100;
-                $paystack_ref     = $paystack_response->data->reference;
-                $order_id = substr($paystack_ref, strpos($paystack_ref, "_") + 1);
+                $status        = $paystack_response->data->status;
+                $amount        = $paystack_response->data->amount / 100;
+                $paystack_ref  = $paystack_response->data->reference;
+                $order_id      = substr($paystack_ref, strpos($paystack_ref, "_") + 1);
 
                 ////
                 $order_details = wpjobster_get_order_details_by_orderid($order_id);
-                $amt = $order_details->final_paidamount;
+                $amt           = $order_details->final_paidamount;
 
-                $amt_arr= explode("|", $amt);
-                $currency = $amt_arr['0'];
-                $order_amount = $amt_arr['1'];
+                $amt_arr       = explode("|", $amt);
+                $currency      = $amt_arr['0'];
+                $order_amount  = $amt_arr['1'];
             } else {
-                $status = "failed";
+                $status        = "failed";
             }
 
         }
@@ -498,7 +496,7 @@ class WPJobster_Paystack_Loader
     public function add_admin_notice( $slug, $class, $message ) 
     {
         $this->notices[ $slug ] = array(
-        'class' => $class,
+        'class'   => $class,
         'message' => $message
         );
     }
@@ -572,7 +570,7 @@ class WPJobster_Paystack_Loader
     /**
      * Get setting link.
      *
-     * @return string Braintree checkout setting link
+     * @return string Paystack checkout setting link
      */
     public function get_setting_link() 
     {
