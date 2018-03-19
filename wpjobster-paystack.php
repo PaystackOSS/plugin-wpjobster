@@ -7,7 +7,7 @@
  * their services in a similar fashion to Envato Studio 
  * or Fiverr by setting an hourly rate or fixed price.
  * 
- * Plugin Name: WPJobster Paystack Gateway
+ * Plugin Name: Paystack Gateway for WPJobster
  * Plugin URI: https://developers.paystack.co/v1.0/docs/plugins
  * Description: This plugin extends WPJobster Theme to accept payments with Paystack.
  * Author: Paystack

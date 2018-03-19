@@ -1,4 +1,4 @@
-=== WPJobster Paystack Gateway ===
+=== Paystack Gateway for WPJobster ===
 Contributors: steveamaza, kendysond
 Donate link: https://paystack.com/demo
 Tags: wpjobster, paystack, payment
@@ -9,15 +9,15 @@ Requires PHP: 5.2.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Payment option for WordPress WPJobster theme by Paystack.
+Payment option by Paystack for WordPress WPJobster theme.
 
 == Description ==
 
 WP Jobster is the most advanced and feature rich WordPress Service Marketplace Theme. 
 
-The **Paystack Payment Option for WPJobster** allows site owners from Nigeria and Ghana to accept payments from their customers, anywhere.
+The **Paystack Gateway for WPJobster** allows site owners from Nigeria and Ghana to accept payments from their customers, anywhere.
 
-To be able to use the WPJobster Paystack Gateway, you must [have an account on Paystack](https://dashboard.paystack.com) from which you will get Test and Live API keys to connect the plugin to your Paystack business.
+To be able to use the Paystack Gateway for WPJobster, you must [have an account on Paystack](https://dashboard.paystack.com) from which you will get Test and Live API keys to connect the plugin to your Paystack business.
 
 = Intuitive Dashboard =
 Use the Paystack dashboard to manage your customers, payments, and track your growth.
@@ -54,7 +54,7 @@ We also have a developer community on Slack where we share product announcements
 
 Automatic installation is the easiest option as WordPress handles the file transfers itself and you don’t need to leave your web browser. To do an automatic install of WPJobster Paystack Gateway, log in to your WordPress dashboard, navigate to the Plugins menu and click Add New.
 
-In the search field type “WPJobster Paystack Gateway” and click Search Plugins. Once you’ve found our payment plugin you can view details about it such as the point release, rating and description. Most importantly of course, you can install it by simply clicking “Install Now”.
+In the search field type “Paystack Gateway for WPJobster” and click Search Plugins. Once you’ve found our payment plugin you can view details about it such as the point release, rating and description. Most importantly of course, you can install it by simply clicking “Install Now”.
 
 = Manual installation =
 
@@ -74,7 +74,7 @@ You can find help and information on Paystack on our [Help Desk](https://paystac
 
 If you get stuck, you can ask for help in the [WooCommerce Plugin Forum](https://wordpress.org/support/plugin/wpjobster-paystack-gateway). You can also directly email support@paystack.com for assistance.
 
-= WPJobster Paystack Gateway is awesome! Can I contribute? =
+= Paystack Gateway for WPJobster is awesome! Can I contribute? =
 
 Yes you can! Join in on our [GitHub repository](https://github.com/PaystackHQ/wordpress-wpjobster-paystack) :)
 
