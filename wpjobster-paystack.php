@@ -37,7 +37,7 @@ if (! defined('ABSPATH') ) {
  * Required minimums
  */
 define('WPJOBSTER_PAYSTACK_MIN_PHP_VER', '5.4.0');
-
+include_once plugin_dir_path(__FILE__) . 'class-paystack-plugin-tracker.php';
 
 class WPJobster_Paystack_Loader
 {
@@ -333,7 +333,7 @@ class WPJobster_Paystack_Loader
         $all_data['job_id']                  = $common_details['pid'];
         $all_data['user_id']                 = $common_details['uid'];
         $all_data['order_id']                = $order_id;
-
+        $all_data['Plugin']                  = "wp-jobster";
         $all_data['success_url']             = get_bloginfo('url') . '/?payment_response=paystack&payment_type=' . $payment_type;
         $all_data['fail_url']                = get_bloginfo('url') . '/?payment_response=paystack&action=fail&payment_type=' . $payment_type;
 
@@ -404,6 +404,14 @@ class WPJobster_Paystack_Loader
                 $amount        = $paystack_response->data->amount / 100;
                 $paystack_ref  = $paystack_response->data->reference;
                 $order_id      = substr($paystack_ref, strpos($paystack_ref, "_") + 1);
+                
+                // PSTK Logger 
+
+                $pstk_logger = new wp_jobster_paystack_plugin_tracker('wp-jobster', $credentials['publicKey']);
+                $pstk_logger->log_transaction_success($code);
+                
+                //
+
 
                 ////
                 $order_details = wpjobster_get_order_details_by_orderid($order_id);
