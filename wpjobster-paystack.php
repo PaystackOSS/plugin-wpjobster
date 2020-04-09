@@ -85,6 +85,8 @@ class WPJobster_Paystack_Loader
         add_action('plugins_loaded', array( $this, 'init_gateways' ), 0);
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), array( $this, 'plugin_action_links' ));
 
+        add_filter('wpj_payment_response_accepted_params', array( $this, 'add_gateway_param_accepted_uri_params' ));
+
         add_filter('wpjobster_take_allowed_currency_paystack_gateway', array( $this,'get_gateway_currency' ));
 
         add_action('wpjobster_taketo_paystack_gateway', array( $this, 'taketogateway_function' ), 10, 2);
@@ -103,6 +105,10 @@ class WPJobster_Paystack_Loader
         return $currency;
     }
 
+    public function add_gateway_param_accepted_uri_params( $arr = array() ) {
+        $arr[] = 'trxref';
+        return $arr;
+    }
 
     /**
      * Initialize the gateway. Called very early - in the context of the plugins_loaded action
@@ -317,6 +323,11 @@ class WPJobster_Paystack_Loader
         $wpjobster_final_payable_amount      = $common_details['wpjobster_final_payable_amount'];
         $currency                            = $common_details['currency'];
 
+        $payment = wpj_get_payment( array(
+            'payment_type'    => $payment_type,
+            'payment_type_id' => $common_details['order_id'],
+        ) );
+
         ////
         $all_data['amount']                  = $wpjobster_final_payable_amount;
         $all_data['currency']                = $currency;
@@ -356,7 +367,7 @@ class WPJobster_Paystack_Loader
         'amount'       => $koboamount,
         'reference'    => $txn_code,
         'metadata'     => json_encode(array('custom_fields' => $meta )),
-        'callback_url' => get_bloginfo('url') . '?payment_response=paystack_response',
+        'callback_url' => get_bloginfo('url') . '?payment_response=paystack_response&payment_type=' . $payment_type . '&wpj_payment_id=' . $payment->id,
 
         );
         $args = array(
